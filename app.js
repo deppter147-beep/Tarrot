@@ -1,102 +1,80 @@
-// Define a 78-card tarot deck with names and major/minor type
 const tarotDeck = [
-    {name: 'The Fool', type: 'Major Arcana'},
-    {name: 'The Magician', type: 'Major Arcana'},
-    {name: 'The High Priestess', type: 'Major Arcana'},
-    {name: 'The Empress', type: 'Major Arcana'},
-    {name: 'The Emperor', type: 'Major Arcana'},
-    {name: 'The Hierophant', type: 'Major Arcana'},
-    {name: 'The Lovers', type: 'Major Arcana'},
-    {name: 'The Chariot', type: 'Major Arcana'},
-    {name: 'Strength', type: 'Major Arcana'},
-    {name: 'The Hermit', type: 'Major Arcana'},
-    {name: 'Wheel of Fortune', type: 'Major Arcana'},
-    {name: 'Justice', type: 'Major Arcana'},
-    {name: 'The Hanged Man', type: 'Major Arcana'},
-    {name: 'Death', type: 'Major Arcana'},
-    {name: 'Temperance', type: 'Major Arcana'},
-    {name: 'The Devil', type: 'Major Arcana'},
-    {name: 'The Tower', type: 'Major Arcana'},
-    {name: 'The Star', type: 'Major Arcana'},
-    {name: 'The Moon', type: 'Major Arcana'},
-    {name: 'The Sun', type: 'Major Arcana'},
-    {name: 'Judgment', type: 'Major Arcana'},
-    {name: 'The World', type: 'Major Arcana'},
-    // ... Placeholder for minor arcana cards
-    {name: 'Ace of Cups', type: 'Minor Arcana'},
-    {name: 'Two of Cups', type: 'Minor Arcana'},
-    {name: 'Three of Cups', type: 'Minor Arcana'},
-    {name: 'Four of Cups', type: 'Minor Arcana'}
-    // Add other minor cards as needed
+    { name: 'The Fool', meaning: { upright: 'New beginnings, adventure', reversed: 'Recklessness, foolishness' } },
+    { name: 'The Magician', meaning: { upright: 'Skill, resourcefulness', reversed: 'Manipulation, poor planning' } },
+    { name: 'The High Priestess', meaning: { upright: 'Intuition, unconscious knowledge', reversed: 'Repressed intuition' } },
+    // ... (Add all 78 cards with Vietnamese names and meanings)
 ];
 
-const selectedCards = [];
-let requestLock = false;
-let cooldown = 3000;
+let cardCollection = [];
 
-document.getElementById('card-list').innerHTML = tarotDeck.map(card => `<div>${card.name} (${card.type})</div>`).join('');
+function searchCards(query) {
+    return tarotDeck.filter(card => card.name.toLowerCase().includes(query.toLowerCase()));
+}
 
-// Search filter
-document.getElementById('search').addEventListener('input', function() {
-    const query = this.value.toLowerCase();
-    const filteredCards = tarotDeck.filter(card => card.name.toLowerCase().includes(query));
-    document.getElementById('card-list').innerHTML = filteredCards.map(card => `<div>${card.name} (${card.type})</div>`).join('');
-});
-
-// Card selection toggle
-document.getElementById('card-list').addEventListener('click', function(event) {
-    const cardName = event.target.innerText.split(' (')[0];
-    if (selectedCards.includes(cardName)) {
-        selectedCards.splice(selectedCards.indexOf(cardName), 1);
-    } else {
-        selectedCards.push(cardName);
+function addCard(cardId) {
+    const card = tarotDeck.find(c => c.id === cardId);
+    if (card) {
+        cardCollection.push(card);
     }
-});
+}
 
-// Handle question and topic fields
-const topicField = document.getElementById('topic');
-const questionField = document.getElementById('question');
+function removeCard(cardId) {
+    cardCollection = cardCollection.filter(card => card.id !== cardId);
+}
 
-// AI toggle and API key storage
-document.getElementById('toggle-ai').addEventListener('change', function() {
-    if (this.checked) {
-        const apiKey = document.getElementById('api-key').value;
-        sessionStorage.setItem('apiKey', apiKey);
+function toggleCard(cardId) {
+    const card = cardCollection.find(c => c.id === cardId);
+    if (card) {
+        card.toggled = !card.toggled;
     }
-});
+}
 
-// Call Gemini API
-async function callGemini() {
-    if (!requestLock) {
-        requestLock = true; // Lock request
-        const apiKey = sessionStorage.getItem('apiKey');
-        const prompt = `Topic: ${topicField.value}, Question: ${questionField.value}, Cards: ${JSON.stringify(selectedCards)}`;
+function generateSpread(numCards) {
+    // Randomly select 'numCards' from 'cardCollection'
+}
+
+function getSuggestions(topic) {
+    // Return question suggestions based on the topic
+}
+
+function generateReading() {
+    // Implement offline short reading generator
+}
+
+async function callGeminiAPI(prompt) {
+    const apiKey = sessionStorage.getItem('gemini_api_key');
+    const response = await fetch('GEMINI_API_ENDPOINT', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ prompt }),
+    });
+    return await response.json();
+}
+
+async function handleRequest() {
+    const maxRetries = 5;
+    let attempt = 0;
+    let backoff = 1000;
+
+    while (attempt < maxRetries) {
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                body: JSON.stringify({ prompt }),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await response.json();
-            console.log(data);
-            // Handle response data accordingly
-            requestLock = false; // Unlock request after processing
+            // Attempt to call the API
+            return await callGeminiAPI('Your prompt here');
         } catch (error) {
-            if (error.message.includes('429')) {
-                await new Promise(resolve => setTimeout(resolve, cooldown));
-                cooldown = Math.min(cooldown * 2, 60000); // Exponential backoff logic
-                callGemini(); // Retry API call
+            if (error.status === 429 || error.status === 'RESOURCE_EXHAUSTED') {
+                await new Promise(resolve => setTimeout(resolve, backoff));
+                backoff *= 2; // Exponential backoff
+                attempt++;
             } else {
-                console.error('API call failed:', error);
-                requestLock = false; // Ensure the lock is released on error
+                throw error; // Rethrow if it's another error
             }
         }
-    } else {
-        console.log('Request in progress, please wait.');
     }
 }
 
-// Basic offline interpretation fallback
-if (!sessionStorage.getItem('apiKey')) {
-    console.warn('AI is disabled. Offline interpretation may apply.');
+function renderResults(data) {
+    document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+    // Show loading status
 }
+
+// Load and run the app when index.html is opened locally

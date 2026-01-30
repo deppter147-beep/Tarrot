@@ -1,40 +1,28 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Vietnamese Tarot Helper</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Vietnamese Tarot Helper</h1>
-
-    <label for="topic">Select a Topic:</label>
-    <select id="topic">
-        <option value="">-- Select --</option>
-        <option value="love">Tình Yêu</option>
-        <option value="career">Sự Nghiệp</option>
-        <option value="health">Sức Khỏe</option>
-        <option value="finance">Tài Chính</option>
-    </select>
-
-    <label for="question">Your Question:</label>
-    <textarea id="question" placeholder="Enter your question here..."></textarea>
-
-    <h2>Card Selection</h2>
-    <input type="text" id="search" placeholder="Search cards...">
-    <ul id="card-list"></ul>
-
-    <button id="toggle-ai">Enable AI</button>
-    <div id="ai-options" style="display:none;">
-        <input type="text" id="api-key" placeholder="Enter your API key...">
-        <select id="model">
-            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-        </select>
-    </div>
-
-    <button id="submit">Giải bài</button>
+    <header>
+        <h1>Vietnamese Tarot Helper</h1>
+    </header>
+    <main>
+        <section id="card-selection">
+            <h2>Select Cards</h2>
+            <div id="cards-container"></div>
+            <button id="add-card">Add Card</button>
+        </section>
+        <section id="selected-cards">
+            <h2>Selected Cards</h2>
+            <ul id="selected-cards-list"></ul>
+        </section>
+        <button id="suggestion-modal">Get Suggestions</button>
+        <div id="result"></div>
+    </main>
     <script src="app.js"></script>
 </body>
 </html>
